@@ -1,0 +1,2523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Timer | PWA</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="manifest" href="manifest.json">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3a0ca3;
+            --success-color: #4cc9f0;
+            --danger-color: #f72585;
+            --learning-color: #7209b7;
+            --dev-color: #ff6b35;
+            --cs-color: #06d6a0;
+            --bio-color: #ffd166;
+            --chem-color: #ef476f;
+            --physics-color: #118ab2;
+            --math-color: #073b4c;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --gray-color: #6c757d;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --radius: 8px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--dark-color);
+            min-height: 100vh;
+            padding: 20px;
+            padding-bottom: 80px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px 0 30px;
+            position: relative;
+        }
+
+        h1 {
+            color: var(--secondary-color);
+            margin-bottom: 8px;
+            font-size: 2.5rem;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        h1:hover {
+            transform: scale(1.02);
+        }
+
+        .subtitle {
+            color: var(--gray-color);
+            font-size: 1.1rem;
+        }
+
+        .developer-indicator {
+            position: absolute;
+            top: 20px;
+            right: 0;
+            background: var(--dev-color);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: none;
+        }
+
+        .app-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .install-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: var(--radius);
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        .install-btn:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .dev-btn {
+            background-color: var(--dev-color);
+        }
+
+        .dev-btn:hover {
+            background-color: #e55a2b;
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--gray-color);
+        }
+
+        .add-task-form {
+            background: white;
+            padding: 25px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: var(--radius);
+            font-size: 1rem;
+            transition: border 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .timer-input {
+            display: flex;
+            gap: 10px;
+        }
+
+        .timer-input input {
+            text-align: center;
+        }
+
+        .add-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 15px;
+            border-radius: var(--radius);
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .add-btn:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .subject-selection {
+            background-color: #f0f8ff;
+            border-radius: var(--radius);
+            padding: 15px;
+            margin-top: 15px;
+            border-left: 4px solid var(--learning-color);
+        }
+
+        .subject-selection h3 {
+            color: var(--learning-color);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .units-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .unit-card {
+            background: white;
+            padding: 12px;
+            border-radius: var(--radius);
+            border: 2px solid #e0e0e0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .unit-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .unit-card.selected {
+            color: white;
+            border-color: transparent;
+        }
+
+        .unit-card i {
+            margin-right: 5px;
+        }
+
+        .tasks-container {
+            margin-top: 20px;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: var(--secondary-color);
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .task-item {
+            background: white;
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .task-item.running {
+            border-left: 5px solid var(--success-color);
+        }
+
+        .task-item.completed {
+            opacity: 0.8;
+            background-color: #f8f9fa;
+        }
+
+        .task-item.learning {
+            border-left: 5px solid var(--learning-color);
+        }
+
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .task-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .task-category {
+            background-color: #e9ecef;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .task-category.learning {
+            background-color: var(--learning-color);
+            color: white;
+        }
+
+        .task-category.work {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .task-category.personal {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .task-category.health {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .task-unit {
+            background-color: #f0f8ff;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: 1px solid #b8daff;
+        }
+
+        .task-timer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .timer-display {
+            font-size: 2.5rem;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+            color: var(--primary-color);
+            min-width: 180px;
+        }
+
+        .timer-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .timer-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--radius);
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .start-btn {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .pause-btn {
+            background-color: #ffbe0b;
+            color: white;
+        }
+
+        .reset-btn {
+            background-color: var(--gray-color);
+            color: white;
+        }
+
+        .delete-btn {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: var(--gray-color);
+            font-size: 0.9rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--gray-color);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #dee2e6;
+        }
+
+        /* Subject-specific styling */
+        .subject-info {
+            background-color: #e6f7ff;
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid #b8daff;
+            display: none;
+        }
+
+        .subject-info.microbiology {
+            background-color: rgba(114, 9, 183, 0.1);
+            border-color: var(--learning-color);
+        }
+
+        .subject-info.computer_science {
+            background-color: rgba(6, 214, 160, 0.1);
+            border-color: var(--cs-color);
+        }
+
+        .subject-info.biology {
+            background-color: rgba(255, 209, 102, 0.1);
+            border-color: var(--bio-color);
+        }
+
+        .subject-info.chemistry {
+            background-color: rgba(239, 71, 111, 0.1);
+            border-color: var(--chem-color);
+        }
+
+        .subject-info.physics {
+            background-color: rgba(17, 138, 178, 0.1);
+            border-color: var(--physics-color);
+        }
+
+        .subject-info.mathematics {
+            background-color: rgba(7, 59, 76, 0.1);
+            border-color: var(--math-color);
+        }
+
+        .subject-info h3 {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .subject-info.microbiology h3 {
+            color: var(--learning-color);
+        }
+
+        .subject-info.computer_science h3 {
+            color: var(--cs-color);
+        }
+
+        .subject-info.biology h3 {
+            color: var(--bio-color);
+        }
+
+        .subject-info.chemistry h3 {
+            color: var(--chem-color);
+        }
+
+        .subject-info.physics h3 {
+            color: var(--physics-color);
+        }
+
+        .subject-info.mathematics h3 {
+            color: var(--math-color);
+        }
+
+        .unit-list {
+            margin-top: 15px;
+            padding-left: 20px;
+        }
+
+        .unit-list li {
+            margin-bottom: 8px;
+            padding-left: 5px;
+        }
+
+        .unit-list li strong {
+            color: inherit;
+        }
+
+        /* Developer Dashboard */
+        .developer-dashboard {
+            background: white;
+            border-radius: var(--radius);
+            padding: 25px;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+            border: 3px solid var(--dev-color);
+            display: none;
+        }
+
+        .dev-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .dev-title {
+            color: var(--dev-color);
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .dev-section {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: var(--radius);
+        }
+
+        .dev-section h3 {
+            color: var(--dev-color);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .subject-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 15px;
+        }
+
+        .subject-tab {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 20px;
+            background: #e9ecef;
+            color: var(--dark-color);
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .subject-tab:hover {
+            transform: translateY(-2px);
+        }
+
+        .subject-tab.active {
+            color: white;
+        }
+
+        .subject-tab.microbiology {
+            background-color: var(--learning-color);
+        }
+
+        .subject-tab.computer_science {
+            background-color: var(--cs-color);
+        }
+
+        .subject-tab.biology {
+            background-color: var(--bio-color);
+        }
+
+        .subject-tab.chemistry {
+            background-color: var(--chem-color);
+        }
+
+        .subject-tab.physics {
+            background-color: var(--physics-color);
+        }
+
+        .subject-tab.mathematics {
+            background-color: var(--math-color);
+        }
+
+        .unit-manager {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .unit-manager-item {
+            background: white;
+            padding: 15px;
+            border-radius: var(--radius);
+            border: 2px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .unit-manager-code {
+            font-weight: 700;
+        }
+
+        .unit-manager-name {
+            font-size: 0.9rem;
+            color: var(--gray-color);
+        }
+
+        .remove-unit-btn {
+            background: var(--danger-color);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .add-unit-form {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .add-unit-form input {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .add-unit-btn {
+            background: var(--success-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .reset-units-btn {
+            background: var(--dev-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .dev-actions {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .dev-action-btn {
+            background: var(--dev-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Audio Settings */
+        .audio-settings {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .audio-test-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: fit-content;
+        }
+
+        /* Login Modal */
+        .login-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+
+        .login-box {
+            background: white;
+            padding: 30px;
+            border-radius: var(--radius);
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .login-title {
+            color: var(--dev-color);
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+
+        .login-input {
+            margin-bottom: 20px;
+        }
+
+        .login-btn {
+            background: var(--dev-color);
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 15px;
+            border-radius: var(--radius);
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .login-error {
+            color: var(--danger-color);
+            text-align: center;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .app-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .install-btn {
+                justify-content: center;
+            }
+            
+            .stats {
+                justify-content: space-around;
+            }
+            
+            .timer-input {
+                flex-direction: column;
+            }
+            
+            .task-timer {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .timer-controls {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .units-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .unit-manager {
+                grid-template-columns: 1fr;
+            }
+            
+            .add-unit-form {
+                flex-direction: column;
+            }
+            
+            .dev-actions {
+                flex-direction: column;
+            }
+        }
+
+        /* PWA installation banner */
+        .install-banner {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--primary-color);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .install-banner.show {
+            transform: translateY(0);
+        }
+
+        .banner-close {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0 10px;
+        }
+
+        /* Time's Up Notification */
+        .time-up-notification {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--danger-color);
+            color: white;
+            padding: 30px;
+            border-radius: var(--radius);
+            z-index: 10000;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            display: none;
+            flex-direction: column;
+            gap: 15px;
+            max-width: 90%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.05); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .notification-title {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .notification-message {
+            font-size: 1.2rem;
+        }
+
+        .close-notification {
+            background: white;
+            color: var(--danger-color);
+            border: none;
+            padding: 10px 20px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 id="appTitle"><i class="fas fa-tasks"></i> Task Timer</h1>
+            <p class="subtitle">A progressive web app for managing tasks with timers</p>
+            <div class="developer-indicator" id="devIndicator">
+                <i class="fas fa-code"></i> Developer Mode Active
+            </div>
+        </header>
+
+        <!-- Developer Access Button -->
+        <button class="install-btn dev-btn" id="devAccessBtn" style="display: none;">
+            <i class="fas fa-code"></i> Developer Dashboard
+        </button>
+
+        <div class="app-controls">
+            <button class="install-btn" id="installButton">
+                <i class="fas fa-download"></i> Install App
+            </button>
+            
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="totalTasks">0</div>
+                    <div class="stat-label">Total Tasks</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="activeTimers">0</div>
+                    <div class="stat-label">Active Timers</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="completedTasks">0</div>
+                    <div class="stat-label">Completed</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Developer Dashboard (Hidden by Default) -->
+        <div class="developer-dashboard" id="devDashboard">
+            <div class="dev-header">
+                <h2 class="dev-title"><i class="fas fa-terminal"></i> Developer Dashboard</h2>
+                <button class="timer-btn delete-btn" id="closeDevDashboard">
+                    <i class="fas fa-times"></i> Close
+                </button>
+            </div>
+            
+            <div class="dev-section">
+                <h3><i class="fas fa-book"></i> Subject Units Manager</h3>
+                <p>Manage units for all subjects available in the app.</p>
+                
+                <!-- Subject Tabs -->
+                <div class="subject-tabs" id="subjectTabs">
+                    <!-- Tabs will be populated by JavaScript -->
+                </div>
+                
+                <!-- Current Subject Info -->
+                <div id="currentSubjectInfo">
+                    <h4 id="currentSubjectTitle">Select a subject above</h4>
+                    <p id="currentSubjectDescription">Choose a subject tab to manage its units</p>
+                </div>
+                
+                <!-- Units List for Selected Subject -->
+                <div class="unit-manager" id="unitManagerList">
+                    <!-- Units will be populated here -->
+                </div>
+                
+                <!-- Add Unit Form -->
+                <div class="add-unit-form">
+                    <input type="text" id="newUnitCode" placeholder="Unit Code (e.g., CSC101)">
+                    <input type="text" id="newUnitName" placeholder="Unit Name">
+                    <button class="add-unit-btn" id="addUnitBtn">
+                        <i class="fas fa-plus"></i> Add Unit to <span id="currentSubjectName">Subject</span>
+                    </button>
+                </div>
+                
+                <button class="reset-units-btn" id="resetUnitsBtn">
+                    <i class="fas fa-undo"></i> Reset Current Subject to Default
+                </button>
+                
+                <button class="reset-units-btn" id="resetAllSubjectsBtn" style="background: var(--danger-color); margin-left: 10px;">
+                    <i class="fas fa-bomb"></i> Reset ALL Subjects
+                </button>
+            </div>
+            
+            <div class="dev-section">
+                <h3><i class="fas fa-plus-circle"></i> Add New Subject</h3>
+                <p>Create a new subject category for the app.</p>
+                
+                <div class="add-unit-form">
+                    <input type="text" id="newSubjectId" placeholder="Subject ID (e.g., engineering)">
+                    <input type="text" id="newSubjectName" placeholder="Subject Name (e.g., Engineering)">
+                    <input type="color" id="newSubjectColor" value="#7209b7" title="Choose color for this subject">
+                    <button class="add-unit-btn" id="addSubjectBtn">
+                        <i class="fas fa-plus"></i> Add New Subject
+                    </button>
+                </div>
+            </div>
+            
+            <div class="dev-section">
+                <h3><i class="fas fa-volume-up"></i> Audio Settings</h3>
+                <div class="audio-settings">
+                    <p>Configure timer completion alerts:</p>
+                    <label>
+                        <input type="checkbox" id="enableAudio" checked> Enable audio alerts
+                    </label>
+                    <label>
+                        <input type="checkbox" id="enableVoice" checked> Enable voice announcement
+                    </label>
+                    <button class="audio-test-btn" id="testAudioBtn">
+                        <i class="fas fa-play-circle"></i> Test Audio Alert
+                    </button>
+                </div>
+            </div>
+            
+            <div class="dev-section">
+                <h3><i class="fas fa-tools"></i> Developer Actions</h3>
+                <div class="dev-actions">
+                    <button class="dev-action-btn" id="clearAllTasksBtn">
+                        <i class="fas fa-trash-alt"></i> Clear All Tasks
+                    </button>
+                    <button class="dev-action-btn" id="exportDataBtn">
+                        <i class="fas fa-file-export"></i> Export Data
+                    </button>
+                    <button class="dev-action-btn" id="importDataBtn">
+                        <i class="fas fa-file-import"></i> Import Data
+                    </button>
+                    <button class="dev-action-btn" id="resetAppBtn">
+                        <i class="fas fa-redo"></i> Reset App
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="add-task-form">
+            <h2>Add New Task</h2>
+            <div class="form-group">
+                <label for="taskTitle">Task Name</label>
+                <input type="text" id="taskTitle" placeholder="Enter task name...">
+            </div>
+            
+            <div class="form-group">
+                <label for="taskCategory">Category</label>
+                <select id="taskCategory">
+                    <option value="work">Work</option>
+                    <option value="personal">Personal</option>
+                    <option value="health">Health</option>
+                    <option value="learning">Learning</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            
+            <!-- Subject Selection (Visible when Learning is selected) -->
+            <div class="subject-selection" id="subjectSelection" style="display: none;">
+                <h3><i class="fas fa-graduation-cap"></i> Select Learning Subject</h3>
+                <select id="subject">
+                    <option value="">Select a subject...</option>
+                    <!-- Subjects will be populated by JavaScript -->
+                </select>
+                
+                <!-- Units Selection (Visible when a subject is selected) -->
+                <div class="units-selection" id="unitsSelection" style="display: none; margin-top: 15px;">
+                    <h4 id="unitsSelectionTitle"><i class="fas fa-flask"></i> Select Unit</h4>
+                    <div class="units-grid" id="unitsGrid">
+                        <!-- Units will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Set Timer</label>
+                <div class="timer-input">
+                    <div style="flex: 1;">
+                        <input type="number" id="hours" min="0" max="24" value="0" placeholder="Hours">
+                    </div>
+                    <div style="flex: 1;">
+                        <input type="number" id="minutes" min="0" max="59" value="30" placeholder="Minutes">
+                    </div>
+                    <div style="flex: 1;">
+                        <input type="number" id="seconds" min="0" max="59" value="0" placeholder="Seconds">
+                    </div>
+                </div>
+            </div>
+            
+            <button class="add-btn" id="addTaskBtn">
+                <i class="fas fa-plus-circle"></i> Add Task
+            </button>
+        </div>
+
+        <!-- Subject Information Panels (Initially hidden) -->
+        <div class="subject-info microbiology" id="microbiologyInfo">
+            <h3><i class="fas fa-microscope"></i> Microbiology Study Units</h3>
+            <p>Here are the recommended units for Microbiology students:</p>
+            <ul class="unit-list" id="microbiologyUnitList">
+                <!-- Units will be populated by JavaScript -->
+            </ul>
+            <p style="margin-top: 10px; font-style: italic;">Select a unit above to track your study time for that specific subject.</p>
+        </div>
+
+        <div class="subject-info computer_science" id="csInfo">
+            <h3><i class="fas fa-laptop-code"></i> Computer Science Study Units</h3>
+            <p>Here are the recommended units for Computer Science students:</p>
+            <ul class="unit-list" id="csUnitList">
+                <!-- Units will be populated by JavaScript -->
+            </ul>
+        </div>
+
+        <div class="subject-info biology" id="biologyInfo">
+            <h3><i class="fas fa-dna"></i> Biology Study Units</h3>
+            <p>Here are the recommended units for Biology students:</p>
+            <ul class="unit-list" id="biologyUnitList">
+                <!-- Units will be populated by JavaScript -->
+            </ul>
+        </div>
+
+        <div class="subject-info chemistry" id="chemistryInfo">
+            <h3><i class="fas fa-flask"></i> Chemistry Study Units</h3>
+            <p>Here are the recommended units for Chemistry students:</p>
+            <ul class="unit-list" id="chemistryUnitList">
+                <!-- Units will be populated by JavaScript -->
+            </ul>
+        </div>
+
+        <div class="subject-info physics" id="physicsInfo">
+            <h3><i class="fas fa-atom"></i> Physics Study Units</h3>
+            <p>Here are the recommended units for Physics students:</p>
+            <ul class="unit-list" id="physicsUnitList">
+                <!-- Units will be populated by JavaScript -->
+            </ul>
+        </div>
+
+        <div class="subject-info mathematics" id="mathInfo">
+            <h3><i class="fas fa-calculator"></i> Mathematics Study Units</h3>
+            <p>Here are the recommended units for Mathematics students:</p>
+            <ul class="unit-list" id="mathUnitList">
+                <!-- Units will be populated by JavaScript -->
+            </ul>
+        </div>
+
+        <div class="tasks-container">
+            <h2 class="section-title">Your Tasks</h2>
+            <div class="task-list" id="taskList">
+                <!-- Tasks will be added here dynamically -->
+                <div class="empty-state" id="emptyState">
+                    <i class="fas fa-clipboard-list"></i>
+                    <h3>No tasks yet</h3>
+                    <p>Add your first task using the form above</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Task Timer PWA &copy; 2023 | This app works offline and can be installed on your device</p>
+        </div>
+    </div>
+
+    <!-- Time's Up Notification -->
+    <div class="time-up-notification" id="timeUpNotification">
+        <div class="notification-title">⏰ Time's Up!</div>
+        <div class="notification-message" id="timeUpMessage">Your timer has completed!</div>
+        <button class="close-notification" id="closeNotificationBtn">OK, I understand</button>
+    </div>
+
+    <!-- Developer Login Modal -->
+    <div class="login-modal" id="loginModal">
+        <div class="login-box">
+            <h2 class="login-title"><i class="fas fa-lock"></i> Developer Access</h2>
+            <div class="form-group login-input">
+                <label for="devPassword">Enter Developer Password</label>
+                <input type="password" id="devPassword" placeholder="Enter password...">
+            </div>
+            <button class="login-btn" id="loginBtn">
+                <i class="fas fa-sign-in-alt"></i> Access Dashboard
+            </button>
+            <div class="login-error" id="loginError">
+                <i class="fas fa-exclamation-circle"></i> Incorrect password. Try again.
+            </div>
+        </div>
+    </div>
+
+    <!-- PWA Installation Banner -->
+    <div class="install-banner" id="installBanner">
+        <div>
+            <strong>Install Task Timer App</strong>
+            <p>Get quick access from your home screen</p>
+        </div>
+        <div>
+            <button class="install-btn" id="bannerInstallBtn">Install</button>
+            <button class="banner-close" id="closeBannerBtn">&times;</button>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const taskList = document.getElementById('taskList');
+        const emptyState = document.getElementById('emptyState');
+        const addTaskBtn = document.getElementById('addTaskBtn');
+        const totalTasksEl = document.getElementById('totalTasks');
+        const activeTimersEl = document.getElementById('activeTimers');
+        const completedTasksEl = document.getElementById('completedTasks');
+        const installButton = document.getElementById('installButton');
+        const installBanner = document.getElementById('installBanner');
+        const bannerInstallBtn = document.getElementById('bannerInstallBtn');
+        const closeBannerBtn = document.getElementById('closeBannerBtn');
+        const taskCategory = document.getElementById('taskCategory');
+        const subjectSelection = document.getElementById('subjectSelection');
+        const subject = document.getElementById('subject');
+        const unitsSelection = document.getElementById('unitsSelection');
+        const unitsGrid = document.getElementById('unitsGrid');
+        const unitsSelectionTitle = document.getElementById('unitsSelectionTitle');
+        
+        // Developer elements
+        const devDashboard = document.getElementById('devDashboard');
+        const devAccessBtn = document.getElementById('devAccessBtn');
+        const appTitle = document.getElementById('appTitle');
+        const devIndicator = document.getElementById('devIndicator');
+        const loginModal = document.getElementById('loginModal');
+        const devPassword = document.getElementById('devPassword');
+        const loginBtn = document.getElementById('loginBtn');
+        const loginError = document.getElementById('loginError');
+        const closeDevDashboard = document.getElementById('closeDevDashboard');
+        
+        // Developer management elements
+        const subjectTabs = document.getElementById('subjectTabs');
+        const currentSubjectTitle = document.getElementById('currentSubjectTitle');
+        const currentSubjectDescription = document.getElementById('currentSubjectDescription');
+        const currentSubjectName = document.getElementById('currentSubjectName');
+        const unitManagerList = document.getElementById('unitManagerList');
+        const newUnitCode = document.getElementById('newUnitCode');
+        const newUnitName = document.getElementById('newUnitName');
+        const addUnitBtn = document.getElementById('addUnitBtn');
+        const resetUnitsBtn = document.getElementById('resetUnitsBtn');
+        const resetAllSubjectsBtn = document.getElementById('resetAllSubjectsBtn');
+        const newSubjectId = document.getElementById('newSubjectId');
+        const newSubjectName = document.getElementById('newSubjectName');
+        const newSubjectColor = document.getElementById('newSubjectColor');
+        const addSubjectBtn = document.getElementById('addSubjectBtn');
+        const enableAudio = document.getElementById('enableAudio');
+        const enableVoice = document.getElementById('enableVoice');
+        const testAudioBtn = document.getElementById('testAudioBtn');
+        const clearAllTasksBtn = document.getElementById('clearAllTasksBtn');
+        const exportDataBtn = document.getElementById('exportDataBtn');
+        const importDataBtn = document.getElementById('importDataBtn');
+        const resetAppBtn = document.getElementById('resetAppBtn');
+        
+        // Time's up notification
+        const timeUpNotification = document.getElementById('timeUpNotification');
+        const timeUpMessage = document.getElementById('timeUpMessage');
+        const closeNotificationBtn = document.getElementById('closeNotificationBtn');
+
+        // Developer password (Change this to your own secure password)
+        const DEVELOPER_PASSWORD = "admin123";
+        
+        // Default subjects data with units
+        const defaultSubjects = {
+            microbiology: {
+                name: "Microbiology",
+                color: "#7209b7",
+                icon: "fas fa-microscope",
+                units: [
+                    { code: 'SMB100', name: 'Introduction to Microbiology', icon: 'fas fa-book' },
+                    { code: 'SMB108', name: 'Microbial Physiology and Genetics', icon: 'fas fa-dna' },
+                    { code: 'SMB105', name: 'Immunology and Serology', icon: 'fas fa-shield-virus' },
+                    { code: 'SMB103', name: 'Medical Bacteriology', icon: 'fas fa-bacteria' },
+                    { code: 'SMB101', name: 'Virology and Mycology', icon: 'fas fa-virus' },
+                    { code: 'UCU110', name: 'Communication Skills', icon: 'fas fa-comments' }
+                ]
+            },
+            computer_science: {
+                name: "Computer Science",
+                color: "#06d6a0",
+                icon: "fas fa-laptop-code",
+                units: [
+                    { code: 'CSC101', name: 'Introduction to Programming', icon: 'fas fa-code' },
+                    { code: 'CSC102', name: 'Data Structures', icon: 'fas fa-project-diagram' },
+                    { code: 'CSC103', name: 'Algorithms', icon: 'fas fa-brain' },
+                    { code: 'CSC104', name: 'Database Systems', icon: 'fas fa-database' },
+                    { code: 'CSC105', name: 'Web Development', icon: 'fas fa-globe' },
+                    { code: 'CSC106', name: 'Software Engineering', icon: 'fas fa-cogs' }
+                ]
+            },
+            biology: {
+                name: "Biology",
+                color: "#ffd166",
+                icon: "fas fa-dna",
+                units: [
+                    { code: 'BIO101', name: 'Cell Biology', icon: 'fas fa-microscope' },
+                    { code: 'BIO102', name: 'Genetics', icon: 'fas fa-dna' },
+                    { code: 'BIO103', name: 'Ecology', icon: 'fas fa-leaf' },
+                    { code: 'BIO104', name: 'Evolution', icon: 'fas fa-fish' },
+                    { code: 'BIO105', name: 'Anatomy & Physiology', icon: 'fas fa-heartbeat' },
+                    { code: 'BIO106', name: 'Biochemistry', icon: 'fas fa-flask' }
+                ]
+            },
+            chemistry: {
+                name: "Chemistry",
+                color: "#ef476f",
+                icon: "fas fa-flask",
+                units: [
+                    { code: 'CHE101', name: 'General Chemistry', icon: 'fas fa-flask' },
+                    { code: 'CHE102', name: 'Organic Chemistry', icon: 'fas fa-atom' },
+                    { code: 'CHE103', name: 'Inorganic Chemistry', icon: 'fas fa-vial' },
+                    { code: 'CHE104', name: 'Physical Chemistry', icon: 'fas fa-temperature-high' },
+                    { code: 'CHE105', name: 'Analytical Chemistry', icon: 'fas fa-chart-line' },
+                    { code: 'CHE106', name: 'Biochemistry', icon: 'fas fa-dna' }
+                ]
+            },
+            physics: {
+                name: "Physics",
+                color: "#118ab2",
+                icon: "fas fa-atom",
+                units: [
+                    { code: 'PHY101', name: 'Mechanics', icon: 'fas fa-weight-hanging' },
+                    { code: 'PHY102', name: 'Electromagnetism', icon: 'fas fa-bolt' },
+                    { code: 'PHY103', name: 'Thermodynamics', icon: 'fas fa-thermometer-half' },
+                    { code: 'PHY104', name: 'Quantum Mechanics', icon: 'fas fa-atom' },
+                    { code: 'PHY105', name: 'Optics', icon: 'fas fa-lightbulb' },
+                    { code: 'PHY106', name: 'Nuclear Physics', icon: 'fas fa-radiation' }
+                ]
+            },
+            mathematics: {
+                name: "Mathematics",
+                color: "#073b4c",
+                icon: "fas fa-calculator",
+                units: [
+                    { code: 'MAT101', name: 'Calculus I', icon: 'fas fa-infinity' },
+                    { code: 'MAT102', name: 'Calculus II', icon: 'fas fa-chart-area' },
+                    { code: 'MAT103', name: 'Linear Algebra', icon: 'fas fa-border-all' },
+                    { code: 'MAT104', name: 'Discrete Mathematics', icon: 'fas fa-project-diagram' },
+                    { code: 'MAT105', name: 'Statistics', icon: 'fas fa-chart-bar' },
+                    { code: 'MAT106', name: 'Differential Equations', icon: 'fas fa-function' }
+                ]
+            }
+        };
+
+        // Variables for PWA installation
+        let deferredPrompt;
+
+        // App state
+        let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+        let activeTimers = 0;
+        let selectedSubject = '';
+        let selectedUnit = '';
+        let isDeveloperMode = localStorage.getItem('devMode') === 'true';
+        let subjectsData = JSON.parse(localStorage.getItem('subjectsData')) || defaultSubjects;
+        let audioEnabled = localStorage.getItem('audioEnabled') !== 'false'; // Default to true
+        let voiceEnabled = localStorage.getItem('voiceEnabled') !== 'false'; // Default to true
+        let currentDevSubject = 'microbiology'; // Currently selected subject in developer dashboard
+        
+        // Audio elements for alerts
+        let audioContext;
+        let alarmSound;
+        let speechSynthesis = window.speechSynthesis;
+        let voices = [];
+
+        // Initialize the app
+        function init() {
+            renderTasks();
+            updateStats();
+            setupEventListeners();
+            checkPWAInstallable();
+            populateSubjectDropdown();
+            updateAllSubjectInfo();
+            loadDeveloperSettings();
+            setupDeveloperMode();
+            loadVoices();
+            populateSubjectTabs();
+            updateDevSubjectInfo();
+            
+            // Initialize audio context (will be resumed on user interaction)
+            if (audioEnabled) {
+                initAudio();
+            }
+        }
+
+        // Load developer settings from localStorage
+        function loadDeveloperSettings() {
+            enableAudio.checked = audioEnabled;
+            enableVoice.checked = voiceEnabled;
+        }
+
+        // Initialize audio
+        function initAudio() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                createAlarmSound();
+            } catch (e) {
+                console.log("Web Audio API not supported in this browser");
+                audioEnabled = false;
+                enableAudio.checked = false;
+            }
+        }
+
+        // Create alarm sound
+        function createAlarmSound() {
+            if (!audioContext) return;
+            
+            // Create oscillator for beep sound
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            
+            alarmSound = { oscillator, gainNode };
+        }
+
+        // Play alarm sound
+        function playAlarmSound() {
+            if (!audioEnabled || !alarmSound || !audioContext) return;
+            
+            try {
+                // Resume audio context if suspended (required by browsers)
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+                
+                alarmSound.oscillator.start();
+                alarmSound.gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 2);
+                alarmSound.oscillator.stop(audioContext.currentTime + 2);
+                
+                // Recreate the sound for next time
+                setTimeout(createAlarmSound, 2100);
+            } catch (e) {
+                console.log("Error playing alarm sound:", e);
+            }
+        }
+
+        // Load available voices for speech synthesis
+        function loadVoices() {
+            voices = speechSynthesis.getVoices();
+            
+            // Try to find a female voice
+            let femaleVoice = voices.find(voice => 
+                voice.name.includes('Female') || 
+                voice.name.includes('woman') || 
+                voice.name.includes('Woman') ||
+                voice.lang.includes('en-US')
+            );
+            
+            // If no female voice found, use the first available voice
+            if (!femaleVoice && voices.length > 0) {
+                femaleVoice = voices[0];
+            }
+            
+            return femaleVoice;
+        }
+
+        // Speak a message
+        function speakMessage(message, times = 1) {
+            if (!voiceEnabled || !speechSynthesis) return;
+            
+            // Cancel any ongoing speech
+            speechSynthesis.cancel();
+            
+            // Create speech utterance
+            const utterance = new SpeechSynthesisUtterance(message);
+            
+            // Try to set a female voice
+            const femaleVoice = loadVoices();
+            if (femaleVoice) {
+                utterance.voice = femaleVoice;
+            }
+            
+            utterance.rate = 0.9; // Slightly slower
+            utterance.pitch = 1.2; // Slightly higher pitch (more feminine)
+            utterance.volume = 1;
+            
+            // Speak multiple times
+            for (let i = 0; i < times; i++) {
+                // Add delay between repetitions
+                if (i > 0) {
+                    setTimeout(() => {
+                        speechSynthesis.speak(utterance);
+                    }, i * 1500);
+                } else {
+                    speechSynthesis.speak(utterance);
+                }
+            }
+        }
+
+        // Show time's up notification
+        function showTimeUpNotification(taskTitle) {
+            timeUpMessage.textContent = `"${taskTitle}" timer has completed!`;
+            timeUpNotification.style.display = 'flex';
+            
+            // Play alarm sound
+            if (audioEnabled) {
+                playAlarmSound();
+            }
+            
+            // Speak message three times
+            if (voiceEnabled) {
+                speakMessage("Your time is up! Your time is up! Your time is up!", 1);
+            }
+        }
+
+        // Set up developer mode
+        function setupDeveloperMode() {
+            if (isDeveloperMode) {
+                devAccessBtn.style.display = 'flex';
+                devIndicator.style.display = 'block';
+            }
+            
+            // Secret code to show developer access: triple click on app title
+            let clickCount = 0;
+            let clickTimer;
+            
+            appTitle.addEventListener('click', function() {
+                clickCount++;
+                
+                if (clickCount === 1) {
+                    clickTimer = setTimeout(() => {
+                        clickCount = 0;
+                    }, 500);
+                } else if (clickCount === 3) {
+                    clearTimeout(clickTimer);
+                    clickCount = 0;
+                    
+                    if (!isDeveloperMode) {
+                        loginModal.style.display = 'flex';
+                    } else {
+                        devDashboard.style.display = 'block';
+                    }
+                }
+            });
+        }
+
+        // Populate subject dropdown in the main form
+        function populateSubjectDropdown() {
+            subject.innerHTML = '<option value="">Select a subject...</option>';
+            
+            Object.keys(subjectsData).forEach(subjectId => {
+                const subjectData = subjectsData[subjectId];
+                const option = document.createElement('option');
+                option.value = subjectId;
+                option.textContent = subjectData.name;
+                subject.appendChild(option);
+            });
+            
+            // Add "Other" option
+            const otherOption = document.createElement('option');
+            otherOption.value = 'other';
+            otherOption.textContent = 'Other Subject';
+            subject.appendChild(otherOption);
+        }
+
+        // Update all subject info panels
+        function updateAllSubjectInfo() {
+            Object.keys(subjectsData).forEach(subjectId => {
+                const subjectData = subjectsData[subjectId];
+                const unitListElement = document.getElementById(`${subjectId}UnitList`);
+                
+                if (unitListElement) {
+                    unitListElement.innerHTML = '';
+                    subjectData.units.forEach(unit => {
+                        const li = document.createElement('li');
+                        li.innerHTML = `<strong>${unit.code}</strong> - ${unit.name}`;
+                        unitListElement.appendChild(li);
+                    });
+                }
+            });
+        }
+
+        // Populate subject tabs in developer dashboard
+        function populateSubjectTabs() {
+            subjectTabs.innerHTML = '';
+            
+            Object.keys(subjectsData).forEach(subjectId => {
+                const subjectData = subjectsData[subjectId];
+                const tab = document.createElement('button');
+                tab.className = `subject-tab ${subjectId} ${subjectId === currentDevSubject ? 'active' : ''}`;
+                tab.textContent = subjectData.name;
+                tab.style.backgroundColor = subjectData.color;
+                tab.dataset.subjectId = subjectId;
+                
+                tab.addEventListener('click', function() {
+                    // Remove active class from all tabs
+                    document.querySelectorAll('.subject-tab').forEach(t => {
+                        t.classList.remove('active');
+                    });
+                    
+                    // Add active class to clicked tab
+                    this.classList.add('active');
+                    currentDevSubject = subjectId;
+                    updateDevSubjectInfo();
+                    populateUnitManager();
+                });
+                
+                subjectTabs.appendChild(tab);
+            });
+        }
+
+        // Update developer subject info
+        function updateDevSubjectInfo() {
+            const subjectData = subjectsData[currentDevSubject];
+            if (!subjectData) return;
+            
+            currentSubjectTitle.textContent = `${subjectData.name} Units`;
+            currentSubjectTitle.innerHTML = `<i class="${subjectData.icon}"></i> ${subjectData.name} Units`;
+            currentSubjectDescription.textContent = `Manage units for ${subjectData.name} subject.`;
+            currentSubjectName.textContent = subjectData.name;
+            
+            // Update add button color
+            addUnitBtn.style.backgroundColor = subjectData.color;
+        }
+
+        // Populate unit manager list in developer dashboard
+        function populateUnitManager() {
+            unitManagerList.innerHTML = '';
+            const subjectData = subjectsData[currentDevSubject];
+            
+            if (!subjectData || !subjectData.units) return;
+            
+            subjectData.units.forEach(unit => {
+                const unitItem = document.createElement('div');
+                unitItem.className = 'unit-manager-item';
+                unitItem.innerHTML = `
+                    <div>
+                        <div class="unit-manager-code" style="color: ${subjectData.color}">${unit.code}</div>
+                        <div class="unit-manager-name">${unit.name}</div>
+                    </div>
+                    <button class="remove-unit-btn" data-code="${unit.code}">
+                        <i class="fas fa-trash"></i> Remove
+                    </button>
+                `;
+                
+                unitManagerList.appendChild(unitItem);
+            });
+            
+            // Add event listeners to remove buttons
+            document.querySelectorAll('.remove-unit-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const unitCode = this.dataset.code;
+                    removeUnit(unitCode);
+                });
+            });
+        }
+
+        // Populate units grid for selected subject in main form
+        function populateUnitsGrid(subjectId) {
+            unitsGrid.innerHTML = '';
+            const subjectData = subjectsData[subjectId];
+            
+            if (!subjectData || !subjectData.units) return;
+            
+            unitsSelectionTitle.innerHTML = `<i class="${subjectData.icon}"></i> Select ${subjectData.name} Unit`;
+            
+            subjectData.units.forEach(unit => {
+                const unitCard = document.createElement('div');
+                unitCard.className = 'unit-card';
+                unitCard.dataset.code = unit.code;
+                unitCard.style.borderColor = subjectData.color;
+                unitCard.innerHTML = `
+                    <i class="${unit.icon}"></i>
+                    <div>${unit.code}</div>
+                `;
+                
+                unitCard.addEventListener('click', function() {
+                    // Remove selected class from all unit cards
+                    document.querySelectorAll('.unit-card').forEach(card => {
+                        card.classList.remove('selected');
+                    });
+                    
+                    // Add selected class to clicked card
+                    this.classList.add('selected');
+                    this.style.backgroundColor = subjectData.color;
+                    selectedUnit = unit.code;
+                    
+                    // Auto-fill task title with unit name
+                    document.getElementById('taskTitle').value = `Study ${unit.code}: ${unit.name}`;
+                });
+                
+                unitCard.addEventListener('mouseover', function() {
+                    if (!this.classList.contains('selected')) {
+                        this.style.borderColor = subjectData.color;
+                    }
+                });
+                
+                unitCard.addEventListener('mouseout', function() {
+                    if (!this.classList.contains('selected')) {
+                        this.style.borderColor = '#e0e0e0';
+                    }
+                });
+                
+                unitsGrid.appendChild(unitCard);
+            });
+        }
+
+        // Set up event listeners
+        function setupEventListeners() {
+            addTaskBtn.addEventListener('click', addTask);
+            
+            // Category change listener
+            taskCategory.addEventListener('change', function() {
+                if (this.value === 'learning') {
+                    subjectSelection.style.display = 'block';
+                } else {
+                    subjectSelection.style.display = 'none';
+                    unitsSelection.style.display = 'none';
+                    hideAllSubjectInfo();
+                    selectedSubject = '';
+                    selectedUnit = '';
+                }
+            });
+            
+            // Subject change listener
+            subject.addEventListener('change', function() {
+                const subjectId = this.value;
+                
+                // Hide all subject info panels
+                hideAllSubjectInfo();
+                
+                if (subjectId === 'other') {
+                    unitsSelection.style.display = 'none';
+                    selectedSubject = 'other';
+                    selectedUnit = '';
+                } else if (subjectId && subjectsData[subjectId]) {
+                    unitsSelection.style.display = 'block';
+                    selectedSubject = subjectId;
+                    selectedUnit = '';
+                    populateUnitsGrid(subjectId);
+                    
+                    // Show subject info panel
+                    const subjectInfoElement = document.getElementById(`${subjectId}Info`);
+                    if (subjectInfoElement) {
+                        subjectInfoElement.style.display = 'block';
+                    }
+                } else {
+                    unitsSelection.style.display = 'none';
+                    selectedSubject = '';
+                    selectedUnit = '';
+                }
+            });
+            
+            // Developer access button
+            devAccessBtn.addEventListener('click', function() {
+                devDashboard.style.display = 'block';
+            });
+            
+            // Developer login
+            loginBtn.addEventListener('click', function() {
+                if (devPassword.value === DEVELOPER_PASSWORD) {
+                    isDeveloperMode = true;
+                    localStorage.setItem('devMode', 'true');
+                    devAccessBtn.style.display = 'flex';
+                    devIndicator.style.display = 'block';
+                    loginModal.style.display = 'none';
+                    devDashboard.style.display = 'block';
+                    devPassword.value = '';
+                    loginError.style.display = 'none';
+                } else {
+                    loginError.style.display = 'block';
+                    devPassword.value = '';
+                }
+            });
+            
+            // Close developer dashboard
+            closeDevDashboard.addEventListener('click', function() {
+                devDashboard.style.display = 'none';
+            });
+            
+            // Close time's up notification
+            closeNotificationBtn.addEventListener('click', function() {
+                timeUpNotification.style.display = 'none';
+            });
+            
+            // Unit management
+            addUnitBtn.addEventListener('click', addNewUnit);
+            resetUnitsBtn.addEventListener('click', resetCurrentSubjectUnits);
+            resetAllSubjectsBtn.addEventListener('click', resetAllSubjects);
+            
+            // Add new subject
+            addSubjectBtn.addEventListener('click', addNewSubject);
+            
+            // Audio settings
+            enableAudio.addEventListener('change', function() {
+                audioEnabled = this.checked;
+                localStorage.setItem('audioEnabled', audioEnabled);
+                
+                if (audioEnabled && !audioContext) {
+                    initAudio();
+                }
+            });
+            
+            enableVoice.addEventListener('change', function() {
+                voiceEnabled = this.checked;
+                localStorage.setItem('voiceEnabled', voiceEnabled);
+            });
+            
+            testAudioBtn.addEventListener('click', function() {
+                showTimeUpNotification("Test Task");
+            });
+            
+            // Developer actions
+            clearAllTasksBtn.addEventListener('click', clearAllTasks);
+            exportDataBtn.addEventListener('click', exportData);
+            importDataBtn.addEventListener('click', importData);
+            resetAppBtn.addEventListener('click', resetApp);
+            
+            // PWA installation events
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                
+                // Show install button
+                installButton.style.display = 'flex';
+                installButton.addEventListener('click', installPWA);
+                
+                // Show banner after 5 seconds
+                setTimeout(() => {
+                    installBanner.classList.add('show');
+                }, 5000);
+            });
+            
+            bannerInstallBtn.addEventListener('click', installPWA);
+            closeBannerBtn.addEventListener('click', () => {
+                installBanner.classList.remove('show');
+            });
+            
+            // Listen for app installed event
+            window.addEventListener('appinstalled', () => {
+                installButton.style.display = 'none';
+                installBanner.classList.remove('show');
+                deferredPrompt = null;
+                alert('Task Timer app installed successfully!');
+            });
+            
+            // Listen for voice synthesis voices loaded
+            speechSynthesis.addEventListener('voiceschanged', loadVoices);
+        }
+
+        // Hide all subject info panels
+        function hideAllSubjectInfo() {
+            document.querySelectorAll('.subject-info').forEach(element => {
+                element.style.display = 'none';
+            });
+        }
+
+        // Add a new unit to current subject
+        function addNewUnit() {
+            const code = newUnitCode.value.trim().toUpperCase();
+            const name = newUnitName.value.trim();
+            
+            if (!code || !name) {
+                alert('Please enter both unit code and name');
+                return;
+            }
+            
+            const subjectData = subjectsData[currentDevSubject];
+            if (!subjectData) return;
+            
+            // Check if unit already exists
+            if (subjectData.units.some(unit => unit.code === code)) {
+                alert(`Unit ${code} already exists in ${subjectData.name}`);
+                return;
+            }
+            
+            // Add new unit
+            subjectData.units.push({
+                code,
+                name,
+                icon: 'fas fa-book' // Default icon
+            });
+            
+            // Save to localStorage
+            localStorage.setItem('subjectsData', JSON.stringify(subjectsData));
+            
+            // Update UI
+            populateUnitManager();
+            updateAllSubjectInfo();
+            
+            // If this subject is currently selected in the main form, update units grid
+            if (selectedSubject === currentDevSubject) {
+                populateUnitsGrid(currentDevSubject);
+            }
+            
+            // Clear inputs
+            newUnitCode.value = '';
+            newUnitName.value = '';
+            
+            alert(`Unit ${code} added to ${subjectData.name} successfully!`);
+        }
+
+        // Remove a unit from current subject
+        function removeUnit(unitCode) {
+            const subjectData = subjectsData[currentDevSubject];
+            if (!subjectData) return;
+            
+            if (!confirm(`Are you sure you want to remove unit ${unitCode} from ${subjectData.name}?`)) {
+                return;
+            }
+            
+            // Remove unit from array
+            subjectData.units = subjectData.units.filter(unit => unit.code !== unitCode);
+            
+            // Save to localStorage
+            localStorage.setItem('subjectsData', JSON.stringify(subjectsData));
+            
+            // Update UI
+            populateUnitManager();
+            updateAllSubjectInfo();
+            
+            // If this subject is currently selected in the main form, update units grid
+            if (selectedSubject === currentDevSubject) {
+                populateUnitsGrid(currentDevSubject);
+            }
+            
+            // If any tasks use this unit, update them
+            tasks.forEach(task => {
+                if (task.subject === currentDevSubject && task.unit === unitCode) {
+                    task.unit = '';
+                }
+            });
+            saveTasks();
+            renderTasks();
+            
+            alert(`Unit ${unitCode} removed from ${subjectData.name} successfully!`);
+        }
+
+        // Reset current subject units to default
+        function resetCurrentSubjectUnits() {
+            const subjectData = subjectsData[currentDevSubject];
+            if (!subjectData) return;
+            
+            if (!confirm(`Are you sure you want to reset ${subjectData.name} units to default? This will remove any custom units you added.`)) {
+                return;
+            }
+            
+            // Reset to default units
+            const defaultSubject = defaultSubjects[currentDevSubject];
+            if (defaultSubject) {
+                subjectData.units = [...defaultSubject.units];
+                localStorage.setItem('subjectsData', JSON.stringify(subjectsData));
+                
+                populateUnitManager();
+                updateAllSubjectInfo();
+                
+                // If this subject is currently selected in the main form, update units grid
+                if (selectedSubject === currentDevSubject) {
+                    populateUnitsGrid(currentDevSubject);
+                }
+                
+                alert(`${subjectData.name} units reset to default successfully!`);
+            }
+        }
+
+        // Reset all subjects to default
+        function resetAllSubjects() {
+            if (!confirm('Are you sure you want to reset ALL subjects to default? This will remove any custom subjects and units you added.')) {
+                return;
+            }
+            
+            subjectsData = JSON.parse(JSON.stringify(defaultSubjects));
+            localStorage.setItem('subjectsData', JSON.stringify(subjectsData));
+            
+            populateSubjectDropdown();
+            updateAllSubjectInfo();
+            populateSubjectTabs();
+            updateDevSubjectInfo();
+            populateUnitManager();
+            
+            alert('All subjects reset to default successfully!');
+        }
+
+        // Add a new subject
+        function addNewSubject() {
+            const subjectId = newSubjectId.value.trim().toLowerCase().replace(/\s+/g, '_');
+            const subjectName = newSubjectName.value.trim();
+            const subjectColor = newSubjectColor.value;
+            
+            if (!subjectId || !subjectName) {
+                alert('Please enter both subject ID and name');
+                return;
+            }
+            
+            // Check if subject already exists
+            if (subjectsData[subjectId]) {
+                alert(`Subject with ID "${subjectId}" already exists`);
+                return;
+            }
+            
+            // Add new subject
+            subjectsData[subjectId] = {
+                name: subjectName,
+                color: subjectColor,
+                icon: 'fas fa-book',
+                units: []
+            };
+            
+            // Save to localStorage
+            localStorage.setItem('subjectsData', JSON.stringify(subjectsData));
+            
+            // Update UI
+            populateSubjectDropdown();
+            populateSubjectTabs();
+            
+            // Create subject info panel
+            createSubjectInfoPanel(subjectId, subjectName, subjectColor);
+            
+            // Clear inputs
+            newSubjectId.value = '';
+            newSubjectName.value = '';
+            newSubjectColor.value = '#7209b7';
+            
+            alert(`Subject "${subjectName}" added successfully! You can now add units to it.`);
+        }
+
+        // Create a new subject info panel
+        function createSubjectInfoPanel(subjectId, subjectName, color) {
+            // Create the info panel element
+            const infoPanel = document.createElement('div');
+            infoPanel.className = `subject-info ${subjectId}`;
+            infoPanel.id = `${subjectId}Info`;
+            infoPanel.style.display = 'none';
+            infoPanel.style.backgroundColor = `${color}10`;
+            infoPanel.style.borderColor = color;
+            
+            infoPanel.innerHTML = `
+                <h3><i class="fas fa-book"></i> ${subjectName} Study Units</h3>
+                <p>Here are the recommended units for ${subjectName} students:</p>
+                <ul class="unit-list" id="${subjectId}UnitList">
+                    <li>No units added yet. Add units from the developer dashboard.</li>
+                </ul>
+            `;
+            
+            // Insert after the last subject info panel
+            const lastSubjectInfo = document.querySelector('.subject-info:last-of-type');
+            if (lastSubjectInfo) {
+                lastSubjectInfo.after(infoPanel);
+            }
+        }
+
+        // Clear all tasks
+        function clearAllTasks() {
+            if (!confirm('Are you sure you want to clear ALL tasks? This action cannot be undone.')) {
+                return;
+            }
+            
+            tasks = [];
+            activeTimers = 0;
+            saveTasks();
+            renderTasks();
+            updateStats();
+            
+            // Clear timer interval
+            if (window.timerInterval) {
+                clearInterval(window.timerInterval);
+                window.timerInterval = null;
+            }
+            
+            alert('All tasks cleared successfully!');
+        }
+
+        // Export data
+        function exportData() {
+            const appData = {
+                tasks: tasks,
+                subjectsData: subjectsData,
+                settings: {
+                    audioEnabled: audioEnabled,
+                    voiceEnabled: voiceEnabled
+                },
+                exportDate: new Date().toISOString()
+            };
+            
+            const dataStr = JSON.stringify(appData, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = `task-timer-backup-${new Date().toISOString().split('T')[0]}.json`;
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+            
+            alert('Data exported successfully!');
+        }
+
+        // Import data
+        function importData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            
+            input.onchange = function(event) {
+                const file = event.target.files[0];
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    try {
+                        const importedData = JSON.parse(e.target.result);
+                        
+                        if (!confirm(`Are you sure you want to import data? This will replace your current tasks and settings.`)) {
+                            return;
+                        }
+                        
+                        // Import tasks
+                        if (importedData.tasks) {
+                            tasks = importedData.tasks;
+                            saveTasks();
+                        }
+                        
+                        // Import subjects data
+                        if (importedData.subjectsData) {
+                            subjectsData = importedData.subjectsData;
+                            localStorage.setItem('subjectsData', JSON.stringify(subjectsData));
+                        }
+                        
+                        // Import settings
+                        if (importedData.settings) {
+                            audioEnabled = importedData.settings.audioEnabled !== false;
+                            voiceEnabled = importedData.settings.voiceEnabled !== false;
+                            localStorage.setItem('audioEnabled', audioEnabled);
+                            localStorage.setItem('voiceEnabled', voiceEnabled);
+                            loadDeveloperSettings();
+                        }
+                        
+                        // Update UI
+                        renderTasks();
+                        updateStats();
+                        populateSubjectDropdown();
+                        updateAllSubjectInfo();
+                        populateSubjectTabs();
+                        updateDevSubjectInfo();
+                        populateUnitManager();
+                        
+                        alert('Data imported successfully!');
+                    } catch (error) {
+                        alert('Error importing data: Invalid file format');
+                    }
+                };
+                
+                reader.readAsText(file);
+            };
+            
+            input.click();
+        }
+
+        // Reset app
+        function resetApp() {
+            if (!confirm('Are you sure you want to reset the entire app? This will delete ALL data including tasks, subjects, units, and settings.')) {
+                return;
+            }
+            
+            // Clear all localStorage
+            localStorage.clear();
+            
+            // Reset variables
+            tasks = [];
+            activeTimers = 0;
+            subjectsData = JSON.parse(JSON.stringify(defaultSubjects));
+            audioEnabled = true;
+            voiceEnabled = true;
+            isDeveloperMode = false;
+            currentDevSubject = 'microbiology';
+            
+            // Update UI
+            renderTasks();
+            updateStats();
+            populateSubjectDropdown();
+            updateAllSubjectInfo();
+            populateSubjectTabs();
+            updateDevSubjectInfo();
+            populateUnitManager();
+            loadDeveloperSettings();
+            
+            // Clear timer interval
+            if (window.timerInterval) {
+                clearInterval(window.timerInterval);
+                window.timerInterval = null;
+            }
+            
+            // Hide developer dashboard
+            devDashboard.style.display = 'none';
+            devAccessBtn.style.display = 'none';
+            devIndicator.style.display = 'none';
+            
+            alert('App reset successfully! All data has been cleared.');
+        }
+
+        // Check if PWA is installable
+        function checkPWAInstallable() {
+            // Check if app is already installed
+            if (window.matchMedia('(display-mode: standalone)').matches) {
+                installButton.style.display = 'none';
+            }
+        }
+
+        // Install PWA
+        function installPWA() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('User accepted the install prompt');
+                    } else {
+                        console.log('User dismissed the install prompt');
+                    }
+                    deferredPrompt = null;
+                });
+            }
+        }
+
+        // Add a new task
+        function addTask() {
+            const title = document.getElementById('taskTitle').value.trim();
+            const category = document.getElementById('taskCategory').value;
+            const hours = parseInt(document.getElementById('hours').value) || 0;
+            const minutes = parseInt(document.getElementById('minutes').value) || 0;
+            const seconds = parseInt(document.getElementById('seconds').value) || 0;
+            
+            if (!title) {
+                alert('Please enter a task name');
+                return;
+            }
+            
+            const totalSeconds = (hours * 3600) + (minutes * 60) + seconds;
+            
+            if (totalSeconds <= 0) {
+                alert('Please set a timer duration');
+                return;
+            }
+            
+            // For learning tasks, get the subject and unit
+            let subjectValue = '';
+            let unitCode = '';
+            
+            if (category === 'learning') {
+                subjectValue = document.getElementById('subject').value;
+                if (!subjectValue || subjectValue === '') {
+                    alert('Please select a subject for learning tasks');
+                    return;
+                }
+                
+                if (subjectValue !== 'other' && !selectedUnit) {
+                    alert('Please select a unit for this subject');
+                    return;
+                }
+                
+                unitCode = selectedUnit;
+            }
+            
+            const newTask = {
+                id: Date.now(),
+                title,
+                category,
+                subject: subjectValue,
+                unit: unitCode,
+                totalSeconds,
+                remainingSeconds: totalSeconds,
+                isRunning: false,
+                isCompleted: false,
+                createdAt: new Date().toISOString()
+            };
+            
+            tasks.push(newTask);
+            saveTasks();
+            renderTasks();
+            updateStats();
+            
+            // Reset form
+            document.getElementById('taskTitle').value = '';
+            document.getElementById('hours').value = 0;
+            document.getElementById('minutes').value = 30;
+            document.getElementById('seconds').value = 0;
+            
+            // Reset subject selection
+            if (category === 'learning') {
+                document.querySelectorAll('.unit-card').forEach(card => {
+                    card.classList.remove('selected');
+                    card.style.backgroundColor = '';
+                });
+                selectedSubject = '';
+                selectedUnit = '';
+                subject.value = '';
+                unitsSelection.style.display = 'none';
+                hideAllSubjectInfo();
+            }
+            
+            // Focus on task title input
+            document.getElementById('taskTitle').focus();
+        }
+
+        // Render all tasks
+        function renderTasks() {
+            if (tasks.length === 0) {
+                emptyState.style.display = 'block';
+                taskList.innerHTML = '';
+                taskList.appendChild(emptyState);
+                return;
+            }
+            
+            emptyState.style.display = 'none';
+            
+            // Sort tasks: running first, then pending, then completed
+            const sortedTasks = [...tasks].sort((a, b) => {
+                if (a.isRunning && !b.isRunning) return -1;
+                if (!a.isRunning && b.isRunning) return 1;
+                if (!a.isCompleted && b.isCompleted) return -1;
+                if (a.isCompleted && !b.isCompleted) return 1;
+                return new Date(b.createdAt) - new Date(a.createdAt);
+            });
+            
+            taskList.innerHTML = '';
+            
+            sortedTasks.forEach(task => {
+                const taskElement = createTaskElement(task);
+                taskList.appendChild(taskElement);
+            });
+        }
+
+        // Create a task element
+        function createTaskElement(task) {
+            const taskElement = document.createElement('div');
+            taskElement.className = `task-item ${task.isRunning ? 'running' : ''} ${task.isCompleted ? 'completed' : ''} ${task.category === 'learning' ? 'learning' : ''}`;
+            taskElement.dataset.id = task.id;
+            
+            const hours = Math.floor(task.remainingSeconds / 3600);
+            const minutes = Math.floor((task.remainingSeconds % 3600) / 60);
+            const seconds = task.remainingSeconds % 60;
+            
+            const timeDisplay = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            // Get subject data if it's a learning task
+            let subjectData = null;
+            let unitName = '';
+            if (task.category === 'learning' && task.subject && subjectsData[task.subject]) {
+                subjectData = subjectsData[task.subject];
+                
+                if (task.unit && subjectData.units) {
+                    const unitData = subjectData.units.find(u => u.code === task.unit);
+                    unitName = unitData ? unitData.name : '';
+                }
+            }
+            
+            taskElement.innerHTML = `
+                <div class="task-header">
+                    <div>
+                        <div class="task-title">${task.title}</div>
+                        ${task.unit && subjectData ? `
+                            <div class="task-unit" style="margin-top: 5px; background-color: ${subjectData.color}20; color: ${subjectData.color}; border-color: ${subjectData.color}">
+                                <i class="${subjectData.icon}"></i> ${task.unit}${unitName ? `: ${unitName}` : ''}
+                            </div>
+                        ` : ''}
+                    </div>
+                    <div class="task-category ${task.category}">${task.category.charAt(0).toUpperCase() + task.category.slice(1)}</div>
+                </div>
+                <div class="task-timer">
+                    <div class="timer-display">${timeDisplay}</div>
+                    <div class="timer-controls">
+                        ${!task.isCompleted ? `
+                            <button class="timer-btn start-btn" onclick="toggleTimer(${task.id})">
+                                <i class="fas ${task.isRunning ? 'fa-pause' : 'fa-play'}"></i>
+                                ${task.isRunning ? 'Pause' : 'Start'}
+                            </button>
+                            <button class="timer-btn reset-btn" onclick="resetTimer(${task.id})">
+                                <i class="fas fa-redo"></i> Reset
+                            </button>
+                        ` : ''}
+                        <button class="timer-btn delete-btn" onclick="deleteTask(${task.id})">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                </div>
+                ${task.isCompleted ? `
+                    <div style="text-align: center; color: var(--success-color); font-weight: 600;">
+                        <i class="fas fa-check-circle"></i> Task Completed!
+                    </div>
+                ` : ''}
+            `;
+            
+            return taskElement;
+        }
+
+        // Toggle timer (start/pause)
+        function toggleTimer(taskId) {
+            const taskIndex = tasks.findIndex(task => task.id === taskId);
+            if (taskIndex === -1) return;
+            
+            const task = tasks[taskIndex];
+            
+            if (task.isCompleted) return;
+            
+            if (task.isRunning) {
+                // Pause the timer
+                task.isRunning = false;
+                activeTimers--;
+            } else {
+                // Start the timer
+                task.isRunning = true;
+                activeTimers++;
+                
+                // If this is the first timer starting, start the timer interval
+                if (activeTimers === 1) {
+                    startTimerInterval();
+                }
+            }
+            
+            tasks[taskIndex] = task;
+            saveTasks();
+            renderTasks();
+            updateStats();
+        }
+
+        // Reset timer
+        function resetTimer(taskId) {
+            const taskIndex = tasks.findIndex(task => task.id === taskId);
+            if (taskIndex === -1) return;
+            
+            const task = tasks[taskIndex];
+            
+            if (task.isRunning) {
+                task.isRunning = false;
+                activeTimers--;
+            }
+            
+            task.remainingSeconds = task.totalSeconds;
+            task.isCompleted = false;
+            
+            tasks[taskIndex] = task;
+            saveTasks();
+            renderTasks();
+            updateStats();
+        }
+
+        // Delete task
+        function deleteTask(taskId) {
+            const taskIndex = tasks.findIndex(task => task.id === taskId);
+            if (taskIndex === -1) return;
+            
+            const task = tasks[taskIndex];
+            
+            if (task.isRunning) {
+                activeTimers--;
+            }
+            
+            tasks.splice(taskIndex, 1);
+            saveTasks();
+            renderTasks();
+            updateStats();
+        }
+
+        // Timer interval function
+        function startTimerInterval() {
+            // Check if interval is already running
+            if (window.timerInterval) {
+                clearInterval(window.timerInterval);
+            }
+            
+            window.timerInterval = setInterval(() => {
+                let hasActiveTimers = false;
+                
+                tasks.forEach((task, index) => {
+                    if (task.isRunning && !task.isCompleted) {
+                        hasActiveTimers = true;
+                        
+                        if (task.remainingSeconds > 0) {
+                            task.remainingSeconds--;
+                            tasks[index] = task;
+                        } else {
+                            // Timer completed
+                            task.isRunning = false;
+                            task.isCompleted = true;
+                            activeTimers--;
+                            tasks[index] = task;
+                            
+                            // Show time's up notification with sound
+                            showTimeUpNotification(task.title);
+                            
+                            // Special message for learning tasks
+                            if (task.category === 'learning' && task.subject && task.unit) {
+                                setTimeout(() => {
+                                    const subjectData = subjectsData[task.subject];
+                                    if (subjectData) {
+                                        alert(`Great job completing your ${subjectData.name} study session for ${task.unit}! Keep up the good work!`);
+                                    }
+                                }, 100);
+                            }
+                        }
+                    }
+                });
+                
+                if (hasActiveTimers) {
+                    renderTasks();
+                    updateStats();
+                    saveTasks();
+                } else {
+                    // No active timers, clear interval
+                    clearInterval(window.timerInterval);
+                    window.timerInterval = null;
+                }
+            }, 1000);
+        }
+
+        // Update stats
+        function updateStats() {
+            const totalTasks = tasks.length;
+            const completedTasks = tasks.filter(task => task.isCompleted).length;
+            
+            totalTasksEl.textContent = totalTasks;
+            activeTimersEl.textContent = activeTimers;
+            completedTasksEl.textContent = completedTasks;
+        }
+
+        // Save tasks to localStorage
+        function saveTasks() {
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+        }
+
+        // Request notification permission
+        if ('Notification' in window && Notification.permission === 'default') {
+            // We'll ask for permission when the first timer completes
+        }
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', init);
+        
+        // Make functions available globally for onclick attributes
+        window.toggleTimer = toggleTimer;
+        window.resetTimer = resetTimer;
+        window.deleteTask = deleteTask;
+        
+        // Populate unit manager when dev dashboard is shown
+        devDashboard.addEventListener('click', function() {
+            populateUnitManager();
+        });
+    </script>
+</body>
+</html>
